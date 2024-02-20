@@ -55,12 +55,23 @@ app.delete("/api/persons/:id", (req, res) => {
 })
 
 app.post("/api/persons/", (req,res) => {
+    if(!('name' in req.body) || !('number' in req.body)) {
+        return res.status(400).json({error:'content missing'})
+    }
     const max = 100000000
     const id = Math.floor(Math.random() * max);
-    let person = req.body
-    person.id = id
+    let person = {
+        "name": req.body.name,
+        "number": req.body.number,
+        "id": id
+    }
+
+    if(persons.filter(p => p.name === person.name).length > 0) {
+        return res.status(400).json({error:'name already exists'})
+    }
 
     persons.push(person)
+    res.json(person)
 })
 
 
