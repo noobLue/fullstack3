@@ -3,8 +3,11 @@ const morgan = require('morgan')
 
 const app = express()
 
+morgan.token('postData', (req,res) => { return JSON.stringify(req.body)})
+const morganString = ':method :url :status :res[content-length] - :response-time ms :postData'
+
 app.use(express.json())
-app.use(morgan('tiny'))
+app.use(morgan(morganString))
 
 
 let persons = [
