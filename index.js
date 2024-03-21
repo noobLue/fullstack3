@@ -44,38 +44,49 @@ app.get("/info", (req, res) => {
 })
 
 app.get("/api/persons", (req, res) => {
-    Phonebook.find({}).then(p => {
+    Phonebook.find({})
+    .then(p => {
         res.json(p)
     })
+    .catch(error => next(error))
 })
 
 app.get("/api/persons/:id", (req, res) => {
-    const id = Number(req.params.id)
+    /*const id = Number(req.params.id)
     const person = persons.find(note => note.id === id)
     
     if(person) {
         res.json(person)
     } else {
         res.status(404).end()
+    }*/
+
+    res.status(404).end()
+})
+
+app.put("/api/persons/:id", (req, res) => {
+    const id = req.params.id
+    const person = {
+        name: req.body.name,
+        number: req.body.number
     }
+
+    Phonebook.findByIdAndUpdate(id, person, {new: true})
+    .then(newPerson => {
+        res.json(newPerson)
+    })
+    .catch(err => next(err))
+
 })
 
 app.delete("/api/persons/:id", (req, res) => {
-    /*
-    const id = Number(req.params.id)
-    persons = persons.filter(p => p.id !== id)
-    res.status(204).end()
-    */
-
     console.log(`Deleting person by id ${req.params.id}`)
     Phonebook.findByIdAndDelete(req.params.id)
     .then(person => {
         console.log(`Deleting person`, person)
         res.status(204).end()
     })
-    .catch(error => {
-        console.log(error)
-    })
+    .catch(err => next(err))
 })
 
 app.post("/api/persons/", (req,res) => {
@@ -88,7 +99,8 @@ app.post("/api/persons/", (req,res) => {
         number: req.body.number
     })
 
-    person.save().then(results => {
+    person.save()
+    .then(results => {
         /*
         if(persons.filter(p => p.name === person.name).length > 0) {
             return res.status(400).json({error:'name already exists'})
@@ -97,9 +109,28 @@ app.post("/api/persons/", (req,res) => {
         console.log(`added ${results.name} number ${results.number} to phonebook`)
         res.json(person)
     })
+    .catch(err => next(err))
     
 })
 
+const unknownEndpoint = (req, res) => {
+    res.status(404).send({error: "unknown endpoint"})
+}
+app.use(unknownEndpoint)
+
+
+const errorHandler = (err, req, res, next) => {
+    console.error(err)
+
+    if(err.name === "CastError")
+    {
+        return res.status(400).send({error: "malformed id"})
+    }
+
+    next(err)
+}
+
+app.use(errorHandler)
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
