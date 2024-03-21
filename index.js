@@ -13,37 +13,18 @@ app.use(express.static('build'))
 app.use(express.json())
 app.use(morgan(morganString))
 
-
-let persons = [
-    { 
-      "id": 1,
-      "name": "Arto Hellas", 
-      "number": "040-123456"
-    },
-    { 
-      "id": 2,
-      "name": "Ada Lovelace", 
-      "number": "39-44-5323523"
-    },
-    { 
-      "id": 3,
-      "name": "Dan Abramov", 
-      "number": "12-43-234345"
-    },
-    { 
-      "id": 4,
-      "name": "Mary Poppendieck", 
-      "number": "39-23-6423122"
-    }
-]
-
-app.get("/info", (req, res) => {
+app.get("/info", (req, res, next) => {
     const time = new Date(Date.now());
+
+    Phonebook.find({}).then(p => {
+        res.send(`<p>Phonebook has info for ${p.length} people</p><p>${time}</p>`)
+    })
+    .catch(err => next(err))
     
-    res.send(`<p>Phonebook has info for ${persons.length} people</p><p>${time}</p>`)
+    
 })
 
-app.get("/api/persons", (req, res) => {
+app.get("/api/persons", (req, res, next) => {
     Phonebook.find({})
     .then(p => {
         res.json(p)
@@ -51,20 +32,16 @@ app.get("/api/persons", (req, res) => {
     .catch(error => next(error))
 })
 
-app.get("/api/persons/:id", (req, res) => {
-    /*const id = Number(req.params.id)
-    const person = persons.find(note => note.id === id)
-    
-    if(person) {
-        res.json(person)
-    } else {
-        res.status(404).end()
-    }*/
-
-    res.status(404).end()
+app.get("/api/persons/:id", (req, res, next) => {
+    const id = req.params.id
+    Phonebook.findById(id)
+    .then(p => {
+        res.json(p)
+    })
+    .catch(err => next(err))
 })
 
-app.put("/api/persons/:id", (req, res) => {
+app.put("/api/persons/:id", (req, res, next) => {
     const id = req.params.id
     const person = {
         name: req.body.name,
@@ -79,7 +56,7 @@ app.put("/api/persons/:id", (req, res) => {
 
 })
 
-app.delete("/api/persons/:id", (req, res) => {
+app.delete("/api/persons/:id", (req, res, next) => {
     console.log(`Deleting person by id ${req.params.id}`)
     Phonebook.findByIdAndDelete(req.params.id)
     .then(person => {
@@ -89,7 +66,7 @@ app.delete("/api/persons/:id", (req, res) => {
     .catch(err => next(err))
 })
 
-app.post("/api/persons/", (req,res) => {
+app.post("/api/persons/", (req,res, next) => {
     if(!('name' in req.body) || !('number' in req.body)) {
         return res.status(400).json({error:'content missing'})
     }
