@@ -13,3 +13,23 @@ Content-Type: application/json
 {
     "number": "99-99-99999"
 }
+
+
+
+###
+
+POST http://localhost:3000/api/persons
+Content-Type: application/json
+
+{
+    "name": "Pelle",
+    "number": "99-99-99999"
+}
+
+###
+POST http://localhost:3000/api/persons
+Content-Type: application/json
+
+{
+    "number": "99-99-99999"
+}
