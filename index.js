@@ -61,10 +61,21 @@ app.get("/api/persons/:id", (req, res) => {
 })
 
 app.delete("/api/persons/:id", (req, res) => {
+    /*
     const id = Number(req.params.id)
     persons = persons.filter(p => p.id !== id)
-    
     res.status(204).end()
+    */
+
+    console.log(`Deleting person by id ${req.params.id}`)
+    Phonebook.findByIdAndDelete(req.params.id)
+    .then(person => {
+        console.log(`Deleting person`, person)
+        res.status(204).end()
+    })
+    .catch(error => {
+        console.log(error)
+    })
 })
 
 app.post("/api/persons/", (req,res) => {
