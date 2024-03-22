@@ -47,8 +47,13 @@ app.put("/api/persons/:id", (req, res, next) => {
         name: req.body.name,
         number: req.body.number
     }
+    const settings = {
+        new: true, 
+        runValidators: true, 
+        context: 'query'
+    };
 
-    Phonebook.findByIdAndUpdate(id, person, {new: true})
+    Phonebook.findByIdAndUpdate(id, person, settings)
     .then(newPerson => {
         res.json(newPerson)
     })
@@ -78,15 +83,12 @@ app.post("/api/persons/", (req,res, next) => {
 
     person.save()
     .then(results => {
-        /*
-        if(persons.filter(p => p.name === person.name).length > 0) {
-            return res.status(400).json({error:'name already exists'})
-        }
-        */
         console.log(`added ${results.name} number ${results.number} to phonebook`)
         res.json(person)
     })
-    .catch(err => next(err))
+    .catch(err => {
+        return next(err)
+    })
     
 })
 
@@ -102,6 +104,10 @@ const errorHandler = (err, req, res, next) => {
     if(err.name === "CastError")
     {
         return res.status(400).send({error: "malformed id"})
+    }
+    else if (err.name === "ValidationError")
+    {
+        return res.status(400).send({error: err.message})
     }
 
     next(err)
