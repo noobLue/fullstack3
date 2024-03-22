@@ -65,7 +65,7 @@ app.delete("/api/persons/:id", (req, res, next) => {
     console.log(`Deleting person by id ${req.params.id}`)
     Phonebook.findByIdAndDelete(req.params.id)
     .then(person => {
-        console.log(`Deleting person`, person)
+        console.log(`Deleting person`, person.name)
         res.status(204).end()
     })
     .catch(err => next(err))
@@ -99,7 +99,6 @@ app.use(unknownEndpoint)
 
 
 const errorHandler = (err, req, res, next) => {
-    console.error(err)
 
     if(err.name === "CastError")
     {
@@ -110,6 +109,8 @@ const errorHandler = (err, req, res, next) => {
         return res.status(400).send({error: err.message})
     }
 
+
+    console.log(err.message)
     next(err)
 }
 
